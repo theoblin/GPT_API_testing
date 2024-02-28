@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>HTML 5 Boilerplate</title>
+    <link rel="stylesheet" href="style.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+      integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    />
+    <script
+      src="https://kit.fontawesome.com/43909fb463.js"
+      crossorigin="anonymous"
+    ></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script
+      src="https://code.jquery.com/jquery-3.7.1.js"
+      integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4="
+      crossorigin="anonymous"
+    ></script>
+  </head>
+  <body>
+    <div class="inputs">
+      <input placeholder="&nbsp;" class="main_input base_input" />
+      <button class="main_button default_1">
+        <i class="fa-solid fa-wand-magic-sparkles"></i>
+      </button>
+    </div>
+    <div>
+      <br />
+      <br />
+      <div class="inputs">
+        <div class="input_with_icon">
+          <input value="Titre" placeholder="Text" class="input_2" />
+          <i class="fa-solid fa-wand-magic-sparkles completion-option"></i>
+        </div>
+      </div>
+
+      <div class="options"></div>
+    </div>
+  </body>
+</html>
+
+<script>
+  $(".main_button").click(function () {
+    axios
+      .post(
+        "https://api.openai.com/v1/chat/completions",
+        {
+          model: "gpt-3.5-turbo",
+          messages: [
+            {
+              role: "system",
+              content:
+                "ONLY answers in JSON format;ONLY answers in client satisfaction context",
+            },
+            {
+              role: "user",
+              content:
+                "Give me 1 question to ask to my customers about their visit in the store",
+            },
+          ],
+        },
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization:
+              "Bearer {TOKEN}",
+          },
+        }
+      )
+      .then(function (response) {
+        $(".main_input ").val(
+          JSON.parse(response.data.choices[0].message.content).question
+        );
+      })
+  });
+
+  $(".completion-option").click(function () {
+    axios
+      .post(
+        "https://api.openai.com/v1/chat/completions",
+        {
+          model: "gpt-3.5-turbo",
+          messages: [
+            {
+              role: "system",
+              content:
+                'ONLY answers in this JSON format:{"question": ,"answers": []} ;ONLY answers in client satisfaction context',
+            },
+            {
+              role: "user",
+              content:
+                "Give me 1 question from this categories:['product','delivery','store','sellers'] to ask to my customers and give 3 differents answers with 3 words maximum to respond to the question",
+            },
+          ],
+        },
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization:
+              "Bearer {TOKEN}",
+          },
+        }
+      )
+      .then(function (response) {
+        const options = JSON.parse(
+        response.data.choices[0].message.content
+        ).answers;
+        $(".input_2").val(
+          JSON.parse(response.data.choices[0].message.content).question
+        );
+        $(".main_option").remove();
+        options.forEach((e) => {
+          $(".options").append(
+            '<div class="main_option" ><span>' + e + "</span></div>"
+          );
+        });
+      })
+  });
+</script>
